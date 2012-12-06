@@ -1,0 +1,14 @@
+Added a sys.path.append to the main script so it
+looks for its needed modules under
+/usr/share/golismero/
+--- a/GoLismero.py
++++ b/GoLismero.py
+@@ -19,6 +19,8 @@ along with this program; if not, write t
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ '''
+ 
++import sys
++sys.path.append("/usr/share/golismero/")
+ import argparse 
+ from libs.updater import *
+ from libs.io_functions import *
