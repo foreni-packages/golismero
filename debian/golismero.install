@@ -1,0 +1,6 @@
+Admin usr/share/golismero/
+api.* usr/share/golismero/
+argparse.* usr/share/golismero/
+bs4 usr/share/golismero/
+libs usr/share/golismero/
+wordlist usr/share/golismero/ 
