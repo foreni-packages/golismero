@@ -1,15 +1,18 @@
 Source: golismero
-Section: unknown
+Section: net
 Priority: extra
 Maintainer: Devon Kearns <dookie@kali.org>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.3
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/golismero.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/golismero.git;a=summary
+Homepage: https://code.google.com/p/golismero/
+Vcs-Git: ssh://git@git.kali.org/packages/golismero.git
+Vcs-Browser: http://git.kali.org/gitweb/?p=packages/golismero.git;a=summary
 
 Package: golismero
 Architecture: all
-Depends: ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: ${misc:Depends}, python2.7
+Description: Web application mapper
+ GoLISMERO help you to map an web application, displaying as 
+ confortable format for security auditor and preparing them 
+ for intergrate with other web hacking tools as w3af, wfuzz, 
+ netcat, nikto, etc 
