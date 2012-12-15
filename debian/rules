@@ -13,5 +13,4 @@
 	dh $@ 
 override_dh_auto_install:
 	dh_auto_install
-	install debian/kali-golismero.desktop $(CURDIR)/debian/golismero/usr/share/applications/
 	install GoLismero.py $(CURDIR)/debian/golismero/usr/bin/golismero
