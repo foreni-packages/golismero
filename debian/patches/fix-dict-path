@@ -1,0 +1,20 @@
+Index: golismero/libs/vulns.py
+===================================================================
+--- golismero.orig/libs/vulns.py	2013-08-30 12:01:03.938972860 -0400
++++ golismero/libs/vulns.py	2013-08-30 12:37:34.223872460 -0400
+@@ -102,7 +102,7 @@
+ 	'''
+ 	
+ 	m_curr = os.curdir # directorio actual
+-	m_wordlist_dir = m_curr + "/wordlist/wfuzz/Discovery/"
++	m_wordlist_dir = "/usr/share/golismero/wordlist/wfuzz/Discovery/"
+ 	
+ 	# obtenemos todos los ficheros con los diccionarios
+ 	files = os.listdir(m_wordlist_dir)
+@@ -247,4 +247,4 @@
+ 	#print str(a)
+ 	
+ 	print checkURLVulns("/on/navegacion/11822/11822-redireccion.htm", a)
+-	
+\ No newline at end of file
++	
