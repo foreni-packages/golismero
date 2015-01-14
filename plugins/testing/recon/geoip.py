@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -64,15 +60,16 @@ class GeoIP(TestingPlugin):
     # https://github.com/ioerror/blockfinder
     # http://geoip2.readthedocs.org/en/latest/
     # http://www.geonames.org/export/
+    # https://github.com/danielmiessler/geoip/blob/master/geoip.rb
 
 
     #--------------------------------------------------------------------------
-    def get_accepted_info(self):
+    def get_accepted_types(self):
         return [IP, MAC, BSSID, Traceroute, Geolocation]
 
 
     #--------------------------------------------------------------------------
-    def recv_info(self, info):
+    def run(self, info):
 
         # This is where we'll collect the data we'll return.
         results = []
@@ -101,7 +98,7 @@ class GeoIP(TestingPlugin):
             results.extend( addr_to_ip.itervalues() )
             coords_to_geoip = {}
             for res in addr_to_ip.itervalues():
-                r = self.recv_info(res)
+                r = self.run(res)
                 if r:
                     for x in r:
                         if not x.is_instance(Geolocation):

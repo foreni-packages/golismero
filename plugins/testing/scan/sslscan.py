@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: http://golismero-project.com
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -38,11 +34,12 @@ from traceback import format_exc
 from time import time
 
 from golismero.api.config import Config
+from golismero.api.data import Relationship
 from golismero.api.data.db import Database
 from golismero.api.data.information.fingerprint import ServiceFingerprint
 from golismero.api.data.resource.domain import Domain
 from golismero.api.data.resource.ip import IP
-from golismero.api.data.resource.url import BaseUrl
+from golismero.api.data.resource.url import BaseURL
 from golismero.api.data.vulnerability.ssl.insecure_algorithm import InsecureAlgorithm
 from golismero.api.data.vulnerability.ssl.invalid_certificate import InvalidCertificate
 from golismero.api.data.vulnerability.ssl.obsolete_protocol import ObsoleteProtocol
@@ -183,15 +180,15 @@ class SSLScanPlugin(TestingPlugin):
 
 
     #--------------------------------------------------------------------------
-    def get_accepted_info(self):
-        return [BaseUrl, ServiceFingerprint]
+    def get_accepted_types(self):
+        return [BaseURL, Relationship(IP, ServiceFingerprint)]
 
 
     #--------------------------------------------------------------------------
-    def recv_info(self, info):
+    def run(self, info):
 
         # If it's an URL...
-        if info.is_instance(BaseUrl):
+        if info.is_instance(BaseURL):
 
             # Get the hostname to test.
             hostname = info.hostname
@@ -208,30 +205,26 @@ class SSLScanPlugin(TestingPlugin):
             return self.launch_sslscan(hostname, port)
 
         # If it's a service fingerprint...
-        elif info.is_instance(ServiceFingerprint):
+        elif info.is_instance(Relationship(IP, ServiceFingerprint)):
+            ip, fp = info.instances
 
             # Ignore if the port does not support SSL.
-            if info.protocol != "SSL":
+            if fp.protocol != "SSL":
                 Logger.log_more_verbose(
-                    "No SSL services found in fingerprint [%s], aborting."
-                    % info)
+                    "No SSL services found in fingerprint [%s] for IP %s,"
+                    " aborting." % (fp, ip))
                 return
-
-            # Get the associated IPs for this fingerprint.
-            ip_addresses = info.find_linked_data(
-                IP.data_type, IP.data_subtype)
 
             # Get the associated domains for the IPs.
             domains = set()
-            for ip in ip_addresses:
-                domains.update(
-                    ip.find_linked_data(Domain.data_type, Domain.data_subtype)
-                )
+            domains.update(
+                ip.find_linked_data(Domain.data_type, Domain.data_subtype)
+            )
 
             # Scan each domain.
             results = []
             for domain in domains:
-                r = self.launch_sslscan(domain.hostname, info.port)
+                r = self.launch_sslscan(domain.hostname, fp.port)
                 if r:
                     results.extend(r)
             return results
@@ -299,8 +292,12 @@ class SSLScanPlugin(TestingPlugin):
                                          callback=Logger.log_verbose)
                 t2 = time()
             if code:
+                if code < 0 and sep == "\\":
+                    asc_code = "0x%.8X" % code
+                else:
+                    asc_code = str(code)
                 Logger.log_error(
-                    "SSLScan execution failed, status code: %d" % code)
+                    "SSLScan execution failed, status code: %s" % asc_code)
             else:
                 Logger.log("SSLScan scan finished in %s seconds for target: %s"
                            % (t2 - t1, hostname))

@@ -6,14 +6,10 @@ Authentication data.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -30,10 +26,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-__all__ = ["Username", "Password"]
+__all__ = ["Username", "Password", "get_credentials"]
 
 from . import Asset
-from .. import identity
+from .. import identity, Relationship
 from ...text.text_utils import to_utf8
 
 
@@ -41,9 +37,12 @@ from ...text.text_utils import to_utf8
 class Username(Asset):
     """
     Username.
+
+    May be linked to one or more Password objects
+    to indicate a valid set of credentials.
     """
 
-    information_type = Asset.INFORMATION_USERNAME
+    data_subtype = "username"
 
 
     #--------------------------------------------------------------------------
@@ -72,9 +71,12 @@ class Username(Asset):
 class Password(Asset):
     """
     Password.
+
+    May be linked to one or more Username objects
+    to indicate a valid set of credentials.
     """
 
-    information_type = Asset.INFORMATION_PASSWORD
+    data_subtype = "password"
 
 
     #--------------------------------------------------------------------------
@@ -97,3 +99,43 @@ class Password(Asset):
         :rtype: str
         """
         return self.__password
+
+
+#------------------------------------------------------------------------------
+def get_credentials(user_or_pass):
+    """
+    Given a username or a password,
+    find valid credentials in the audit database.
+
+    :param user_or_pass: Username or password.
+    :type user_or_pass: Username | Password
+
+    :returns: Valid credentials.
+    :rtype: list(Relationship(Username, Password))
+    """
+
+    # If given a username, look for passwords.
+    if user_or_pass.is_instance(Username):
+        passwords = {
+            x.password: x for x in user_or_pass.find_linked_data(
+                Password.data_type, Password.data_subtype)
+        }
+        Rel = Relationship(Username, Password)
+        keys = passwords.keys()
+        keys.sort()
+        return [ Rel(user_or_pass, passwords[x]) for x in keys ]
+
+    # If given a password, look for usernames.
+    if user_or_pass.is_instance(Password):
+        usernames = {
+            x.name: x for x in user_or_pass.find_linked_data(
+                Username.data_type, Username.data_subtype)
+        }
+        Rel = Relationship(Username, Password)
+        keys = usernames.keys()
+        keys.sort()
+        return [ Rel(usernames[x], user_or_pass) for x in keys ]
+
+    # If given anything else, raise an exception.
+    raise TypeError(
+        "Expected Username or Password, got %r instead" % type(user_or_pass))

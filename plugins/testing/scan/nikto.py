@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: http://golismero-project.com
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -30,7 +26,7 @@ from golismero.api.config import Config
 from golismero.api.data.db import Database
 from golismero.api.data.resource.domain import Domain
 from golismero.api.data.resource.ip import IP
-from golismero.api.data.resource.url import BaseUrl, Url
+from golismero.api.data.resource.url import BaseURL, URL
 from golismero.api.data.vulnerability import UncategorizedVulnerability
 from golismero.api.data.vulnerability.infrastructure.vulnerable_webapp \
      import VulnerableWebApp
@@ -58,12 +54,12 @@ class NiktoPlugin(TestingPlugin):
 
 
     #--------------------------------------------------------------------------
-    def get_accepted_info(self):
-        return [BaseUrl]
+    def get_accepted_types(self):
+        return [BaseURL]
 
 
     #--------------------------------------------------------------------------
-    def recv_info(self, info):
+    def run(self, info):
 
         # Get the path to the Nikto scanner and the configuration file.
         nikto_script, config = self.get_nikto()
@@ -208,7 +204,7 @@ class NiktoPlugin(TestingPlugin):
         Run Nikto and convert the output to the GoLismero data model.
 
         :param info: Base URL to scan.
-        :type info: BaseUrl
+        :type info: BaseURL
 
         :param output_filename: Path to the output filename.
             The format should always be CSV.
@@ -274,7 +270,7 @@ class NiktoPlugin(TestingPlugin):
         Convert the output of a Nikto scan to the GoLismero data model.
 
         :param info: Data object to link all results to (optional).
-        :type info: BaseUrl
+        :type info: BaseURL
 
         :param output_filename: Path to the output filename.
             The format should always be CSV.
@@ -334,7 +330,7 @@ class NiktoPlugin(TestingPlugin):
 
                         # Report the URLs.
                         if (target, method) not in urls_seen:
-                            url = Url(target, method)
+                            url = URL(target, method)
                             urls_seen[ (target, method) ] = url
                             results.append(url)
                         else:
@@ -344,12 +340,14 @@ class NiktoPlugin(TestingPlugin):
                         refs = extract_from_text(text)
                         refs.difference_update(urls_seen.itervalues())
 
-                        # Report the vulnerabilities.
+                        # Convert the information to the GoLismero model.
                         if vuln_tag == "OSVDB-0":
                             kwargs = {"level": "informational"}
                         else:
                             kwargs = extract_vuln_ids(
                                 "%s: %s" % (vuln_tag, text))
+                        kwargs["custom_id"] = ";".join(
+                            (host, ip, port, vuln_tag, method, path, text))
                         kwargs["description"] = text if text else None
                         kwargs["references"]  = refs
                         if "osvdb" in kwargs and "OSVDB-0" in kwargs["osvdb"]:
@@ -359,11 +357,14 @@ class NiktoPlugin(TestingPlugin):
                                 kwargs["osvdb"] = tuple(tmp)
                             else:
                                 del kwargs["osvdb"]
+
+                        # Instance the Vulnerability object.
                         if vuln_tag == "OSVDB-0":
-                            vuln = UncategorizedVulnerability(**kwargs)
-                            vuln.add_resource(url)
+                            vuln = UncategorizedVulnerability(url, **kwargs)
                         else:
                             vuln = VulnerableWebApp(url, **kwargs)
+
+                        # Add the vulnerability to the results.
                         results.append(vuln)
                         vuln_count += 1
 

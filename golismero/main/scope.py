@@ -6,14 +6,10 @@ Audit scope checking.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -34,7 +30,7 @@ __all__ = ["AuditScope", "DummyScope"]
 
 from ..api.data.resource.domain import Domain
 from ..api.data.resource.ip import IP
-from ..api.data.resource.url import Url
+from ..api.data.resource.url import URL
 from ..api.net.dns import DNS
 from ..api.net.web_utils import ParsedURL, split_hostname
 from ..api.text.text_utils import to_utf8
@@ -120,7 +116,7 @@ class AbstractScope (object):
         result.extend( IP(address) for address in self.addresses )
         result.extend( Domain(domain) for domain in self.domains )
         result.extend( Domain(root) for root in self.roots )
-        result.extend( Url(url) for url in self.web_pages )
+        result.extend( URL(url) for url in self.web_pages )
         return result
 
 

@@ -4,12 +4,8 @@
 __license__ = """
 GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
-
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,7 +32,7 @@ except ImportError:
     import pickle as pickle
 
 from golismero.api.config import Config
-from golismero.api.data.resource.url import FolderUrl
+from golismero.api.data.resource.url import FolderURL
 from golismero.api.data.information.html import HTML
 from golismero.api.data import discard_data
 from golismero.api.data.vulnerability.infrastructure.outdated_software import OutdatedSoftware
@@ -97,14 +93,14 @@ class PlecostPlugin(TestingPlugin):
 
 
     #--------------------------------------------------------------------------
-    def get_accepted_info(self):
-        return [FolderUrl]
+    def get_accepted_types(self):
+        return [FolderURL]
 
 
     #--------------------------------------------------------------------------
-    def recv_info(self, info):
+    def run(self, info):
 
-        if not isinstance(info, FolderUrl):
+        if not isinstance(info, FolderURL):
             return
 
         plugin_list = Config.plugin_args.get("plugin_list", "")
@@ -126,7 +122,7 @@ class PlecostPlugin(TestingPlugin):
         # Try to detect if there is installed a WordPress
         #
         wordpress_found = self.__detect_wordpress_installation(url, wordpress_urls)
-        Logger.log_verbose("%s WordPress instalation found." % "No" if wordpress_found is False else "")
+        Logger.log_verbose("%s WordPress instalation found in '%s'." % ("No" if wordpress_found is False else "", url))
 
         if wordpress_found is False:
             return
@@ -300,7 +296,6 @@ class PlecostPlugin(TestingPlugin):
 
         return results
 
-
     #--------------------------------------------------------------------------
     def __detect_wordpress_installation(self, url, wordpress_urls):
         """
@@ -315,16 +310,23 @@ class PlecostPlugin(TestingPlugin):
         :return: True if wordpress installation found. False otherwise.
         :rtype: bool
         """
-        Logger.log("Detecting Wordpress instalation in URI: '%s'." % url)
+        Logger.log_more_verbose("Detecting Wordpress instalation in URI: '%s'." % url)
         total_urls = 0
         urls_found = 0
-        for u in WordListLoader.get_wordlist(wordpress_urls):
+
+        error_page = get_error_page(url).raw_data
+
+        for u in WordListLoader.get_wordlist_as_list(wordpress_urls):
             total_urls += 1
             tmp_url = urljoin(url, u)
 
             r = HTTP.get_url(tmp_url, use_cache=False)
             if r.status == "200":
-                urls_found += 1
+
+                # Try to detect non-default error pages
+                ratio = get_diff_ratio(r.raw_response, error_page)
+                if ratio < 0.35:
+                    urls_found += 1
 
             discard_data(r)
 

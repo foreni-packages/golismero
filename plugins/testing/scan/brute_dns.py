@@ -6,14 +6,10 @@ This plugin tries to find hidden subdomains.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: http://golismero-project.com
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 
 This program is free software; you can redistribute it and/or
@@ -46,12 +42,12 @@ class DNSBruteforcer(TestingPlugin):
 
 
     #--------------------------------------------------------------------------
-    def get_accepted_info(self):
+    def get_accepted_types(self):
         return [Domain]
 
 
     #--------------------------------------------------------------------------
-    def recv_info(self, info):
+    def run(self, info):
 
         # Get the root domain only.
         root = info.root
@@ -67,7 +63,7 @@ class DNSBruteforcer(TestingPlugin):
 
         # Load the subdomains wordlist.
         try:
-            wordlist = WordListLoader.get_advanced_wordlist_as_list(Config.plugin_args["wordlist"])
+            wordlist = WordListLoader.get_wordlist_as_list(Config.plugin_args["wordlist"])
         except WordlistNotFound:
             Logger.log_error_verbose("Wordlist '%s' not found.." % Config.plugin_args["wordlist"])
             return
@@ -77,7 +73,7 @@ class DNSBruteforcer(TestingPlugin):
 
         # Load the subdomains whitelist.
         try:
-            whitelist = WordListLoader.get_advanced_wordlist_as_list(Config.plugin_config["wordlist"])
+            whitelist = WordListLoader.get_wordlist_as_list(Config.plugin_config["wordlist"])
         except WordlistNotFound:
             Logger.log_error_verbose("Wordlist '%s' not found.." % Config.plugin_config["wordlist"])
             return
@@ -152,13 +148,12 @@ class DNSBruteforcer(TestingPlugin):
             # Check for Domain disclosure
             #
             if prefix not in whitelist:
-                d = DomainDisclosure(name,
+                d = DomainDisclosure(domain,
                                      risk        = 0,
                                      level       = "low",
                                      title       = "Possible subdomain leak",
                                      description = "A subdomain was discovered which may be an unwanted information disclosure."
                                      )
-                d.add_resource(domain)
                 results.append(d)
 
 

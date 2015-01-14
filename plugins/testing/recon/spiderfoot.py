@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -45,7 +41,7 @@ from golismero.api.data.information.portscan import Portscan
 from golismero.api.data.resource.domain import Domain
 from golismero.api.data.resource.email import Email
 from golismero.api.data.resource.ip import IP
-from golismero.api.data.resource.url import Url
+from golismero.api.data.resource.url import URL
 from golismero.api.data.vulnerability import Vulnerability
 from golismero.api.data.vulnerability.malware.defaced import DefacedUrl, \
     DefacedDomain, DefacedIP
@@ -71,7 +67,9 @@ class SpiderFootPlugin(TestingPlugin):
         # Check the parameters.
         try:
             raw_url = Config.plugin_args["url"]
-            assert raw_url, "Missing URL"
+            assert raw_url, "SpiderFoot plugin not configured!" \
+                            " Please specify the URL to connect to" \
+                            " the SpiderFoot server."
             url = parse_url(raw_url)
             assert url.scheme, "Invalid URL"
             assert url.host, "Invalid URL"
@@ -103,12 +101,12 @@ class SpiderFootPlugin(TestingPlugin):
 
 
     #--------------------------------------------------------------------------
-    def get_accepted_info(self):
+    def get_accepted_types(self):
         return [Domain]
 
 
     #--------------------------------------------------------------------------
-    def recv_info(self, info):
+    def run(self, info):
 
         # Get the base URL to the SpiderFoot API.
         base_url = Config.plugin_args["url"]
@@ -437,7 +435,7 @@ class SpiderFootParser(object):
 
     #--------------------------------------------------------------------------
     def __reconstruct_http(self, raw_url):
-        url = Url(raw_url)
+        url = URL(raw_url)
         req = HTTP_Request(
             method = "GET",
             url    = raw_url,
@@ -463,22 +461,22 @@ class SpiderFootParser(object):
 
     #--------------------------------------------------------------------------
     def sf_URL_STATIC(self, sf_module, source, raw_data):
-        return Url(raw_data)
+        return URL(raw_data)
 
 
     #--------------------------------------------------------------------------
     def sf_URL_FORM(self, sf_module, source, raw_data):
-        return Url(raw_data, referer=source, method="POST")
+        return URL(raw_data, referer=source, method="POST")
 
 
     #--------------------------------------------------------------------------
     def sf_URL_UPLOAD(self, sf_module, source, raw_data):
-        return Url(raw_data, referer=source, method="POST")
+        return URL(raw_data, referer=source, method="POST")
 
 
     #--------------------------------------------------------------------------
     def sf_URL_PASSWORD(self, sf_module, source, raw_data):
-        url = Url(source)
+        url = URL(source)
         password = Password(raw_data)
         url.add_information(password)
         return url, password
@@ -486,33 +484,33 @@ class SpiderFootParser(object):
 
     #--------------------------------------------------------------------------
     def sf_URL_JAVASCRIPT(self, sf_module, source, raw_data):
-        return Url(raw_data, referer=source)
+        return URL(raw_data, referer=source)
 
 
     #--------------------------------------------------------------------------
     def sf_URL_JAVA_APPLET(self, sf_module, source, raw_data):
-        return Url(raw_data, referer=source)
+        return URL(raw_data, referer=source)
 
 
     #--------------------------------------------------------------------------
     def sf_URL_FLASH(self, sf_module, source, raw_data):
-        return Url(raw_data, referer=source)
+        return URL(raw_data, referer=source)
 
 
     #--------------------------------------------------------------------------
     def sf_LINKED_URL_INTERNAL(self, sf_module, source, raw_data):
-        return Url(raw_data, referer=source)
+        return URL(raw_data, referer=source)
 
 
     #--------------------------------------------------------------------------
     def sf_LINKED_URL_EXTERNAL(self, sf_module, source, raw_data):
         if self.allow_external:
-            return Url(raw_data, referer=source)
+            return URL(raw_data, referer=source)
 
 
     #--------------------------------------------------------------------------
     def sf_PROVIDER_JAVASCRIPT(self, sf_module, source, raw_data):
-        return Url(raw_data, referer=source)
+        return URL(raw_data, referer=source)
 
 
     #--------------------------------------------------------------------------
@@ -623,7 +621,7 @@ class SpiderFootParser(object):
 
     #--------------------------------------------------------------------------
     def sf_TARGET_WEB_CONTENT(self, sf_module, source, raw_data):
-        url = Url(source)
+        url = URL(source)
         html = HTML(raw_data)
         url.add_information(html)
         self.reconstruct_http_data[source] = raw_data
@@ -748,9 +746,7 @@ class SpiderFootParser(object):
     def sf_SSL_CERTIFICATE_MISMATCH(self, sf_module, source, raw_data):
         domain = Domain(parse_url(source).host)
         vulnerability = InvalidCertificate(  # XXX or is it InvalidCommonName?
-            domain = domain,
-            tool_id = sf_module,
-        )
+            domain, tool_id = sf_module)
         return domain, vulnerability
 
 
@@ -758,9 +754,7 @@ class SpiderFootParser(object):
     def sf_SSL_CERTIFICATE_EXPIRED(self, sf_module, source, raw_data):
         domain = Domain(parse_url(source).host)
         vulnerability = OutdatedCertificate(
-            domain = domain,
-            tool_id = sf_module,
-        )
+            domain, tool_id = sf_module)
         return domain, vulnerability
 
     # TODO: not sure what's the difference with SSL_CERTIFICATE_EXPIRING yet
@@ -769,10 +763,7 @@ class SpiderFootParser(object):
     #--------------------------------------------------------------------------
     def sf_BLACKLISTED_IPADDR(self, sf_module, source, raw_data):
         ip = IP(source)
-        vulnerability = MaliciousIP(
-            ip = ip,
-            tool_id = sf_module,
-        )
+        vulnerability = MaliciousIP(ip, tool_id = sf_module)
         return ip, vulnerability
 
 
@@ -780,31 +771,22 @@ class SpiderFootParser(object):
     def sf_BLACKLISTED_AFFILIATE_IPADDR(self, sf_module, source, raw_data):
         if self.allow_external:
             ip = IP(source)
-            vulnerability = MaliciousIP(
-                ip = ip,
-                tool_id = sf_module,
-            )
+            vulnerability = MaliciousIP(ip, tool_id = sf_module)
             return ip, vulnerability
 
 
     #--------------------------------------------------------------------------
     def sf_DEFACED(self, sf_module, source, raw_data):
-        url = Url(source)
-        vulnerability = DefacedUrl(
-            url = url,
-            tool_id = sf_module,
-        )
+        url = URL(source)
+        vulnerability = DefacedUrl(url, tool_id = sf_module)
         return url, vulnerability
 
 
     #--------------------------------------------------------------------------
     def sf_DEFACED_COHOST(self, sf_module, source, raw_data):
         if self.allow_external:
-            url = Url(source)
-            vulnerability = DefacedUrl(
-                url = url,
-                tool_id = sf_module,
-            )
+            url = URL(source)
+            vulnerability = DefacedUrl(url, tool_id = sf_module)
             return url, vulnerability
 
 
@@ -812,10 +794,7 @@ class SpiderFootParser(object):
     def sf_DEFACED_AFFILIATE(self, sf_module, source, raw_data):
         if self.allow_external:
             domain = Domain(source)
-            vulnerability = DefacedDomain(
-                domain = domain,
-                tool_id = sf_module,
-            )
+            vulnerability = DefacedDomain(domain, tool_id = sf_module)
             return domain, vulnerability
 
 
@@ -823,20 +802,14 @@ class SpiderFootParser(object):
     def sf_DEFACED_AFFILIATE_IPADDR(self, sf_module, source, raw_data):
         if self.allow_external:
             ip = IP(source)
-            vulnerability = DefacedIP(
-                ip = ip,
-                tool_id = sf_module,
-            )
+            vulnerability = DefacedIP(ip, tool_id = sf_module)
             return ip, vulnerability
 
 
     #--------------------------------------------------------------------------
     def sf_MALICIOUS_SUBDOMAIN(self, sf_module, source, raw_data):
         domain = Domain(source)
-        vulnerability = MaliciousDomain(
-            domain = domain,
-            tool_id = sf_module,
-        )
+        vulnerability = MaliciousDomain(domain, tool_id = sf_module)
         return domain, vulnerability
 
 
@@ -844,41 +817,29 @@ class SpiderFootParser(object):
     def sf_MALICIOUS_AFFILIATE(self, sf_module, source, raw_data):
         if self.allow_external:
             domain = Domain(source)
-            vulnerability = MaliciousDomain(
-                domain = domain,
-                tool_id = sf_module,
-            )
+            vulnerability = MaliciousDomain(domain, tool_id = sf_module)
             return domain, vulnerability
 
 
     #--------------------------------------------------------------------------
     def sf_MALICIOUS_COHOST(self, sf_module, source, raw_data):
         if self.allow_external:
-            url = Url(source)
-            vulnerability = MaliciousUrl(
-                url = url,
-                tool_id = sf_module,
-            )
+            url = URL(source)
+            vulnerability = MaliciousUrl(url, tool_id = sf_module)
             return url, vulnerability
 
 
     #--------------------------------------------------------------------------
     def sf_MALICIOUS_ASN(self, sf_module, source, raw_data):
         asn = ASN(raw_data)
-        vulnerability = MaliciousASN(
-            asn = asn,
-            tool_id = sf_module,
-        )
+        vulnerability = MaliciousASN(asn, tool_id = sf_module)
         return asn, vulnerability
 
 
     #--------------------------------------------------------------------------
     def sf_MALICIOUS_IPADDR(self, sf_module, source, raw_data):
         ip = IP(source)
-        vulnerability = MaliciousIP(
-            ip = ip,
-            tool_id = sf_module,
-        )
+        vulnerability = MaliciousIP(ip, tool_id = sf_module)
         return ip, vulnerability
 
 
@@ -886,10 +847,7 @@ class SpiderFootParser(object):
     def sf_MALICIOUS_AFFILIATE_IPADDR(self, sf_module, source, raw_data):
         if self.allow_external:
             ip = IP(source)
-            vulnerability = MaliciousIP(
-                ip = ip,
-                tool_id = sf_module,
-            )
+            vulnerability = MaliciousIP(ip, tool_id = sf_module)
             return ip, vulnerability
 
 

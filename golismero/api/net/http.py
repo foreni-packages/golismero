@@ -6,14 +6,10 @@ HTTP protocol API for GoLismero.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -38,7 +34,7 @@ from .web_utils import detect_auth_method, get_auth_obj
 from ..config import Config
 from ..data import LocalDataCache, discard_data
 from ..data.information.http import HTTP_Request, HTTP_Response, HTTP_Raw_Request
-from ..data.resource.url import Url
+from ..data.resource.url import URL
 from ...common import Singleton, get_data_folder
 
 from hashlib import md5
@@ -70,10 +66,6 @@ class _HTTP(Singleton):
         """
         .. warning: Called automatically by GoLismero. Do not call!
         """
-
-        # Initialize the CA bundle.
-        if not environ.get("CURL_CA_BUNDLE"):
-            environ["CURL_CA_BUNDLE"] = join(get_data_folder(), "cacert.pem")
 
         # Start a new session.
         self.__session = Session()
@@ -316,11 +308,11 @@ class _HTTP(Singleton):
                     if not cont:
                         return
 
-                # Autogenerate an Url object.
+                # Autogenerate an URL object.
                 # XXX FIXME: the depth level is broken!!!
                 url_obj = None
                 if url != request.url:
-                    url_obj = Url(
+                    url_obj = URL(
                         url         = url,
                         method      = request.method,
                         post_params = request.post_data,

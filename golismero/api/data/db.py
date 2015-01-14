@@ -6,14 +6,10 @@ Information, resources and vulnerabilities database API.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -88,73 +84,58 @@ class Database(Singleton):
 
     #--------------------------------------------------------------------------
     @staticmethod
-    def remove(identity, data_type = None):
+    def remove(identity):
         """
         Remove an object given its identity hash.
 
-        Optionally restrict the result by data type. Depending on the
-        underlying database, this may result in a performance gain.
+        .. warning: Only use this if you *really* know what you're doing!
 
         :param identity: Identity hash.
         :type identity: str
-
-        :param data_type: Optional data type. One of the Data.TYPE_* values.
-        :type data_type: int
 
         :returns: True if the object was removed, False if it didn't exist.
         :rtype: bool
         """
         return Config._context.remote_call(
-            MessageCode.MSG_RPC_DATA_REMOVE, identity, data_type)
+            MessageCode.MSG_RPC_DATA_REMOVE, identity)
 
 
     #--------------------------------------------------------------------------
     @staticmethod
-    def async_remove(identity, data_type = None):
+    def async_remove(identity):
         """
         Asynchronously remove an object given its identity hash.
 
-        Optionally restrict the result by data type. Depending on the
-        underlying database, this may result in a performance gain.
+        .. warning: Only use this if you *really* know what you're doing!
 
         :param identity: Identity hash.
         :type identity: str
-
-        :param data_type: Optional data type. One of the Data.TYPE_* values.
-        :type data_type: int
         """
         Config._context.async_remote_call(
-            MessageCode.MSG_RPC_DATA_REMOVE, identity, data_type)
+            MessageCode.MSG_RPC_DATA_REMOVE, identity)
 
 
     #--------------------------------------------------------------------------
     @staticmethod
-    def async_remove_many(identities, data_type = None):
+    def async_remove_many(identities):
         """
         Asynchronously remove multiple objects given their identity hashes.
 
-        Optionally restrict the result by data type. Depending on the
-        underlying database, this may result in a performance gain.
+        .. warning: Only use this if you *really* know what you're doing!
 
         :param identities: Identity hashes.
         :type identities: str
-
-        :param data_type: Optional data type. One of the Data.TYPE_* values.
-        :type data_type: int
         """
         Config._context.async_remote_call(
-            MessageCode.MSG_RPC_DATA_REMOVE_MANY, identities, data_type)
+            MessageCode.MSG_RPC_DATA_REMOVE_MANY, identities)
 
 
     #--------------------------------------------------------------------------
     @staticmethod
-    def has_key(identity, data_type = None):
+    def has_key(identity):
         """
         Check if an object with the given
         identity hash is present in the database.
-
-        Optionally restrict the result by data type. Depending on the
-        underlying database, this may result in a performance gain.
 
         :param identity: Identity hash.
         :type identity: str
@@ -163,48 +144,39 @@ class Database(Singleton):
         :rtype: bool
         """
         return Config._context.remote_call(
-            MessageCode.MSG_RPC_DATA_CHECK, identity, data_type)
+            MessageCode.MSG_RPC_DATA_CHECK, identity)
 
 
     #--------------------------------------------------------------------------
     @staticmethod
-    def get(identity, data_type = None):
+    def get(identity):
         """
         Get an object given its identity hash.
 
-        Optionally restrict the result by data type. Depending on the
-        underlying database, this may result in a performance gain.
-
         :param identity: Identity hash.
         :type identity: str
-
-        :param data_type: Optional data type. One of the Data.TYPE_* values.
-        :type data_type: int
 
         :returns: Data object if found, None otherwise.
         :rtype: Data | None
         """
         return Config._context.remote_call(
-            MessageCode.MSG_RPC_DATA_GET, identity, data_type)
+            MessageCode.MSG_RPC_DATA_GET, identity)
 
 
     #--------------------------------------------------------------------------
     @staticmethod
-    def get_many(identities, data_type = None):
+    def get_many(identities):
         """
         Get an object given its identity hash.
 
         :param identities: Identity hashes.
         :type identities: list(str)
 
-        :param data_type: Optional data type. One of the Data.TYPE_* values.
-        :type data_type: int
-
         :returns: Data objects.
         :rtype: list(Data)
         """
         return Config._context.remote_call(
-            MessageCode.MSG_RPC_DATA_GET_MANY, identities, data_type)
+            MessageCode.MSG_RPC_DATA_GET_MANY, identities)
 
 
     #--------------------------------------------------------------------------
@@ -215,10 +187,10 @@ class Database(Singleton):
         type, optionally filtering by subtype.
 
         :param data_type: Optional data type. One of the Data.TYPE_* values.
-        :type data_type: int
+        :type data_type: int | None
 
         :param data_subtype: Optional data subtype.
-        :type data_subtype: int | str
+        :type data_subtype: str | None
 
         :returns: Identity hashes.
         :rtype: set(str)
@@ -239,10 +211,10 @@ class Database(Singleton):
         optionally filtering by subtype.
 
         :param data_type: Optional data type. One of the Data.TYPE_* values.
-        :type data_type: int
+        :type data_type: int | None
 
         :param data_subtype: Optional data subtype.
-        :type data_subtype: int | str
+        :type data_subtype: str | None
 
         :returns: Count of requested objects.
         :rtype: int
@@ -263,10 +235,10 @@ class Database(Singleton):
         optionally filtering by subtype.
 
         :param data_type: Optional data type. One of the Data.TYPE_* values.
-        :type data_type: int
+        :type data_type: int | None
 
         :param data_subtype: Optional data subtype.
-        :type data_subtype: int | str
+        :type data_subtype: str | None
 
         :returns: Generator of Data objects.
         :rtype: generator(Data)
