@@ -1,3 +1,9 @@
+golismero (2.0-beta6+git20150114-0kali0) kali; urgency=medium
+
+  * Imported new upstream release (Closes: 0000607)
+
+ -- Devon Kearns <dookie@kali.org>  Wed, 14 Jan 2015 10:28:43 -0700
+
 golismero (2.0-beta3+git20140220-0kali1) kali; urgency=low
 
   * Imported new upstream release (Closes: 0001034)

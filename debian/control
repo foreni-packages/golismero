@@ -10,7 +10,7 @@ Vcs-Browser: http://git.kali.org/gitweb/?p=packages/golismero.git;a=summary
 
 Package: golismero
 Architecture: all
-Depends: ${misc:Depends}, python2.7, python-docutils, python-pymongo, python-simplejson
+Depends: ${misc:Depends}, python2.7, python-docutils, python-pymongo, python-simplejson, python2.7-dev, python-pip, git, perl, nmap, sslscan, python-argcomplete
 Description: Web application mapper
  GoLISMERO help you to map an web application, displaying as 
  confortable format for security auditor and preparing them 

@@ -1,8 +1,8 @@
-data usr/share/golismero/
 doc usr/share/golismero/
 golismero usr/share/golismero/
 golismero.conf usr/share/golismero/
 golismero.py usr/share/golismero/
+misc usr/share/golismero/
 plugins usr/share/golismero/
 profiles usr/share/golismero/
 tests usr/share/golismero/
