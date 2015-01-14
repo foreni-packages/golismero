@@ -1,0 +1,15 @@
+golismero source: source-is-missing
+golismero: arch-independent-package-contains-binary-or-object
+golismero: arch-dependent-file-in-usr-share
+golismero: binary-has-unneeded-section
+golismero: font-in-non-font-package
+golismero: embedded-javascript-library
+golismero: duplicate-font-file
+golismero: extra-license-file
+golismero: windows-devel-file-in-package
+golismero: missing-dependency-on-python-support
+golismero: binary-without-manpage
+golismero: python-script-but-no-python-dep
+golismero: script-not-executable
+golismero: unusual-interpreter
+golismero: executable-not-elf-or-script
