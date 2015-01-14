@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -179,10 +175,10 @@ class RSTReport(ReportPlugin):
     #--------------------------------------------------------------------------
     def __iterate_data(self, identities = None, data_type = None, data_subtype = None):
         if identities is None:
-            identities = list(Database.keys(data_type))
+            identities = list(Database.keys(data_type, data_subtype))
         if identities:
             for page in xrange(0, len(identities), 100):
-                for data in Database.get_many(identities[page:page + 100], data_type):
+                for data in Database.get_many(identities[page:page + 100]):
                     yield data
 
 
@@ -359,9 +355,14 @@ class RSTReport(ReportPlugin):
                         for key, value in properties.iteritems()
                         if value
                     }
+                    if "Target ID" in properties:
+                        properties["Target ID"] = self.__format_rst(
+                            [properties["Target ID"]], True).split("\n")
 
                     # Remove ID properties.
                     for key, value in properties.items():
+                        if key == "Plugin ID" or key == "Target ID":
+                            continue
                         if key.endswith(" ID") and len(value) == 1 and \
                                 len(value[0]) == 32 and value[0].isalnum():
                             del properties[key]

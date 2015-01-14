@@ -6,14 +6,10 @@ HTTP requests and responses.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -82,14 +78,29 @@ class HTTP_Headers (object):
         """
 
         # Reconstruct the raw headers the best we can.
-        reconstructed = [
-            "%s: %s" % (to_utf8(name),
-                        (to_utf8(value)
-                         if value.endswith("\r\n")
-                         else value + "\r\n")
-                        )
-            for name, value in items
-        ]
+        # reconstructed = [
+        #     "%s: %s" % (to_utf8(name),
+        #                 (to_utf8(value)
+        #                  if value.endswith("\r\n")
+        #                  else value + "\r\n")
+        #                 )
+        #     for name, value in items
+        # ]
+
+        reconstructed = []
+
+        for name,value in items:
+            # because the cookie type is a dict
+            if name == 'Cookie':
+                value=";".join(["%s=%s" %
+                               (k,v) for k,v in value.items() ] )
+
+            if not value.endswith("\r\n"):
+                value = value + "\r\n"
+
+            reconstructed.append("%s: %s" %
+                             (to_utf8(name),to_utf8(value)))
+
         reconstructed.append("\r\n")
         raw_headers = "".join(reconstructed)
 
@@ -406,7 +417,7 @@ class HTTP_Request (Capture):
     HTTP request information.
     """
 
-    information_type = Capture.INFORMATION_HTTP_REQUEST
+    data_subtype = "http_request"
 
 
     #
@@ -721,7 +732,7 @@ class HTTP_Raw_Request (Capture):
     Raw HTTP request information.
     """
 
-    information_type = Capture.INFORMATION_HTTP_RAW_REQUEST
+    data_subtype = "http_raw_request"
 
 
     #--------------------------------------------------------------------------
@@ -753,7 +764,7 @@ class HTTP_Response (Capture):
     but receive them from the HTTP API.
     """
 
-    information_type = Capture.INFORMATION_HTTP_RESPONSE
+    data_subtype = "http_response"
     min_informations = 1
 
 

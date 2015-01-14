@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -83,10 +79,10 @@ class ConsoleUIPlugin(UIPlugin):
 
 
     #--------------------------------------------------------------------------
-    def recv_info(self, info):
+    def run(self, info):
 
         # Don't print anything if console output is disabled.
-        if Console.level < Console.STANDARD:
+        if Console.level < Console.MINIMAL:
             return
 
         # Ignore everything but vulnerabilities.
@@ -122,8 +118,8 @@ class ConsoleUIPlugin(UIPlugin):
                 simple_id = len(id_dict)
                 id_dict[message.ack_identity] = simple_id
 
-                # Show this event in verbose mode.
-                if Console.level >= Console.VERBOSE:
+                # Show this event in extra verbose mode.
+                if Console.level >= Console.MORE_VERBOSE:
 
                     # Show a message to the user.
                     m_plugin_name = self.get_plugin_name(message.plugin_id, message.ack_identity)
@@ -134,8 +130,8 @@ class ConsoleUIPlugin(UIPlugin):
             # A plugin has ended.
             elif message.message_code == MessageCode.MSG_STATUS_PLUGIN_END:
 
-                # Show this event in verbose mode.
-                if Console.level >= Console.VERBOSE:
+                # Show this event in extra verbose mode.
+                if Console.level >= Console.MORE_VERBOSE:
 
                     # Show a message to the user.
                     m_plugin_name = self.get_plugin_name(message.plugin_id, message.ack_identity)

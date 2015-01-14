@@ -2,14 +2,10 @@
 # -*- coding: utf-8 -*-
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -27,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
 from golismero.api.data.resource.domain import Domain
-from golismero.api.data.resource.url import Url
+from golismero.api.data.resource.url import URL
 from golismero.api.data.vulnerability.injection.sql import SQLInjection
 from golismero.api.data.vulnerability.injection.xss import XSS
 from golismero.api.logger import Logger
@@ -48,12 +44,12 @@ class PunkSPIDER(TestingPlugin):
 
 
     #--------------------------------------------------------------------------
-    def get_accepted_info(self):
+    def get_accepted_types(self):
         return [Domain]
 
 
     #--------------------------------------------------------------------------
-    def recv_info(self, info):
+    def run(self, info):
 
         # Query PunkSPIDER.
         host_id = info.hostname
@@ -94,8 +90,8 @@ class PunkSPIDER(TestingPlugin):
                 # Get the level.
                 level = to_utf8(v["level"])
 
-                # Create the Url object.
-                url_o = Url(url)
+                # Create the URL object.
+                url_o = URL(url)
                 results.append(url_o)
 
                 # Get the vulnerability class.
@@ -106,7 +102,7 @@ class PunkSPIDER(TestingPlugin):
 
                 # Create the Vulnerability object.
                 vuln = clazz(
-                    url = url_o,
+                    url_o,
                     vulnerable_params = { param: payload },
                     injection_point = clazz.INJECTION_POINT_URL,
                     injection_type = to_utf8(v["bugType"]), # FIXME

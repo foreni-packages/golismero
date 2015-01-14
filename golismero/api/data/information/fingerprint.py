@@ -10,14 +10,10 @@ Fingerprint information.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -83,7 +79,7 @@ def get_all_os_fingerprints(data):
 
     # Get all OS fingerprints associated with the given Data object.
     fingerprints = data.get_associated_informations_by_category(
-        Fingerprint.INFORMATION_OS_FINGERPRINT)
+        OSFingerprint.data_subtype)
 
     # Sort them by accuracy, more accurate fingerprints first.
     return sorted(fingerprints, key=(lambda x: 100.0 - x.accuracy))
@@ -95,7 +91,7 @@ class OSFingerprint(Fingerprint):
     Fingerprint information for a particular operating system.
     """
 
-    information_type = Fingerprint.INFORMATION_OS_FINGERPRINT
+    data_subtype = "os"
 
 
     #--------------------------------------------------------------------------
@@ -339,7 +335,7 @@ class ServiceFingerprint(Fingerprint):
     Service fingerprint.
     """
 
-    information_type = Fingerprint.INFORMATION_SERVICE_FINGERPRINT
+    data_subtype = "service"
 
 
     #--------------------------------------------------------------------------
@@ -424,7 +420,7 @@ class WebServerFingerprint(Fingerprint):
     Fingerprint information for a particular host and web server.
     """
 
-    information_type = Fingerprint.INFORMATION_WEB_SERVER_FINGERPRINT
+    data_subtype = "webserver"
 
 
     #--------------------------------------------------------------------------

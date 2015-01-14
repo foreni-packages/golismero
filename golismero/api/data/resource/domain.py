@@ -6,14 +6,10 @@ Domain name.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -30,7 +26,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-__all__ = ["Domain"]
+__all__ = ["Domain", "RootDomain"]
 
 from . import Resource
 from .. import identity
@@ -48,10 +44,11 @@ class Domain(Resource):
     """
     Domain name.
 
-    This data type maps the domain names to the IP addresses they resolve to.
+    This data type maps the root domain names
+    to the IP addresses they resolve to.
     """
 
-    resource_type = Resource.RESOURCE_DOMAIN
+    data_subtype = "domain"
 
     _re_is_domain = re.compile(r"^[A-Za-z0-9][A-Za-z0-9\_\-\.]*[A-Za-z0-9]$")
 
@@ -146,7 +143,7 @@ class Domain(Resource):
     @property
     def discovered(self):
         domain = self.hostname
-        result = []
+        result = [RootDomain(self.root)]
         subdomain, domain, suffix = split_hostname(domain)
         if subdomain:
             prefix = ".".join( (domain, suffix) )
@@ -155,3 +152,56 @@ class Domain(Resource):
                     result.append( Domain(prefix) )
                 prefix = ".".join( (part, prefix) )
         return result
+
+
+#------------------------------------------------------------------------------
+class RootDomain(Domain):
+    """
+    Root domain name.
+
+    This data type maps the domain names to the IP addresses they resolve to.
+    """
+
+    data_subtype = "root_domain"
+
+
+    #--------------------------------------------------------------------------
+    def __init__(self, hostname):
+
+        # Parent constructor.
+        super(RootDomain, self).__init__(hostname)
+
+        # Make sure it's really a root domain.
+        if self.hostname != self.root:
+            raise ValueError(
+                "Domain %s is not a root domain" % self.hostname)
+
+
+    #--------------------------------------------------------------------------
+    def __repr__(self):
+        return "<Root Domain name=%r>" % self.hostname
+
+
+    #--------------------------------------------------------------------------
+    @property
+    def display_name(self):
+        return "Root Domain Name"
+
+
+    #--------------------------------------------------------------------------
+    @property
+    def root(self):
+        """
+        Alias of "hostname", to ensure both Domain and RootDomain have
+        the same interface.
+
+        :return: Root domain.
+        :rtype: str
+        """
+        return self.hostname
+
+
+    #--------------------------------------------------------------------------
+    @property
+    def discovered(self):
+        return [Domain(self.hostname)]

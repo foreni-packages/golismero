@@ -6,14 +6,10 @@ GoLismero launcher.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -96,6 +92,7 @@ def run(options, *audits):
     Console.display("GoLismero finished at %s UTC" % datetime.datetime.utcnow())
     return return_code
 
+
 def _run(options, *audits):
     try:
 
@@ -170,9 +167,9 @@ def _run(options, *audits):
 
                     continue
 
+    # Catch exit() calls.
     except SystemExit:
         return 1
-
 
     # On error, show a fatal error message.
     except Exception, e:

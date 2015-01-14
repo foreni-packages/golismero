@@ -10,14 +10,10 @@ the different types of DNS queries and responses.
 from __future__ import absolute_import
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: http://golismero-project.com
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 
 This program is free software; you can redistribute it and/or
@@ -132,7 +128,7 @@ class DnsRegister(Capture):
     Base class for DNS Registers.
     """
 
-    information_type = Capture.INFORMATION_DNS_REGISTER
+    data_subtype = "information/dns/abstract"
 
 
     # Types of registers
@@ -371,6 +367,7 @@ class DnsRegister(Capture):
 
 #------------------------------------------------------------------------------
 class DNSRegisterAlgorithm(DnsRegister):
+    data_subtype = "information/dns/abstract"
 
 
     #--------------------------------------------------------------------------
@@ -1858,7 +1855,7 @@ class DnsRegisterSIG(DnsRegisterRRSIG):
     """
     Register type 'RRSIG'
     """
-    pass
+    data_subtype = "dns_register_sig"
 
 
 #------------------------------------------------------------------------------

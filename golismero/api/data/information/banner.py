@@ -6,14 +6,10 @@ Service banner.
 """
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -47,7 +43,6 @@ class Banner(Fingerprint):
     Service banner.
     """
 
-    information_type = Fingerprint.INFORMATION_BANNER
     min_resources = 1
 
 
@@ -124,7 +119,7 @@ class Banner(Fingerprint):
         return {
             ip.address
             for ip in self.get_associated_resources_by_category(
-                          IP.resource_type)
+                          IP.data_subtype)
         }
 
 
@@ -137,7 +132,7 @@ class Banner(Fingerprint):
         return {
             domain.name
             for domain in self.get_associated_resources_by_category(
-                          Domain.resource_type)
+                          Domain.data_subtype)
         }
 
 

@@ -1,15 +1,12 @@
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 __license__ = """
-GoLismero 2.0 - The web knife - Copyright (C) 2011-2013
-
-Authors:
-  Daniel Garcia Garcia a.k.a cr0hn | cr0hn<@>cr0hn.com
-  Mario Vilas | mvilas<@>gmail.com
+GoLismero 2.0 - The web knife - Copyright (C) 2011-2014
 
 Golismero project site: https://github.com/golismero
-Golismero project mail: golismero.project<@>gmail.com
+Golismero project mail: contact@golismero-project.com
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -40,6 +37,7 @@ from golismero.api.plugin import import_plugin, get_plugin_name
 from collections import Counter
 from zipfile import ZipFile, ZIP_DEFLATED
 
+import cgi
 import os
 import os.path
 import warnings
@@ -61,13 +59,15 @@ class HTMLReport(json.JSONOutput):
         output_file = output_file.lower()
         return (
             output_file.endswith(".html") or
-            output_file.endswith(".htm") or
-            output_file.endswith(".zip")
+            output_file.endswith(".htm")
         )
 
 
     #--------------------------------------------------------------------------
     def generate_report(self, output_file):
+
+        Logger.log_verbose(
+            "Writing HTML report to file: %s" % output_file)
 
         Logger.log_more_verbose("Generating JSON database...")
 
@@ -89,6 +89,15 @@ class HTMLReport(json.JSONOutput):
         # Remove the false positives, if any.
         del report_data["false_positives"]
 
+        # Gather all taxonomies into a single property.
+        for vuln in report_data["vulnerabilities"].itervalues():
+            taxonomy = []
+            for prop in TAXONOMY_NAMES:
+                taxonomy.extend(vuln.get(prop, []))
+            if taxonomy:
+                taxonomy.sort()
+                vuln["taxonomy"] = taxonomy
+
         # It's easier for the JavaScript code in the report to access the
         # vulnerabilities as an array instead of a map, so let's fix that.
         # Also, delete all properties we know aren't being used in the report.
@@ -96,6 +105,7 @@ class HTMLReport(json.JSONOutput):
         sort_keys = [
             (data["display_name"],
              data["plugin_id"],
+             data["target_id"],
              data["identity"])
             for data in vulnerabilities.itervalues()
         ]
@@ -108,6 +118,7 @@ class HTMLReport(json.JSONOutput):
                 if propname in (
                     "display_name",
                     "plugin_id",
+                    "target_id",
                     "identity",
                     "links",
                     "data_type",
@@ -115,6 +126,7 @@ class HTMLReport(json.JSONOutput):
                     "title",
                     "description",
                     "solution",
+                    "taxonomy",
                     "references",
                     "level",
                     "impact",
@@ -122,7 +134,7 @@ class HTMLReport(json.JSONOutput):
                     "risk",
                 )
             }
-            for _, _, identity in sort_keys
+            for _, _, _, identity in sort_keys
         ]
         vulnerabilities.clear()
         sort_keys = []
@@ -171,11 +183,6 @@ class HTMLReport(json.JSONOutput):
                     data["plugin_name"] = plugin_map[plugin_id]
         plugin_map.clear()
 
-        # We also want to tell the HTML report which of the vulnerability
-        # properties are part of the taxonomy. This saves us from having to
-        # change the HTML code every time we add a new taxonomy property.
-        ##report_data["supported_taxonomies"] = TAXONOMY_NAMES
-
         # Calculate some statistics, so the JavaScript code doesn't have to.
         vulns_by_level = Counter()
         for level in Vulnerability.VULN_LEVELS:
@@ -206,58 +213,22 @@ class HTMLReport(json.JSONOutput):
                   % (VERSION, report_data["summary"]["report_time"])
 
         # Serialize the data and cleanup the unserialized version.
-        if output_file.endswith(".zip"):
-            serialized_data = json.dumps(report_data,
-                                         sort_keys=True, indent=4)
-        else:
-            serialized_data = json.dumps(report_data)
+        serialized_data = json.dumps(report_data)
         del report_data
 
-        # Get the directory where we can find our template.
-        html_report = os.path.dirname(__file__)
-        html_report = os.path.join(html_report, "html_report")
-        html_report = os.path.abspath(html_report)
-        if not html_report.endswith(os.path.sep):
-            html_report += os.path.sep
+        # Escape all HTML entities from the serialized data,
+        # since the JSON library doesn't seem to do it.
+        serialized_data = cgi.escape(serialized_data)
 
         # Save the report data to disk.
         Logger.log_more_verbose("Writing report to disk...")
-
-        # Save it as a zip file.
-        if output_file.endswith(".zip"):
-            with ZipFile(output_file, mode="w", compression=ZIP_DEFLATED,
-                         allowZip64=True) as zip:
-
-                # Save the zip file comment.
-                zip.comment = comment
-
-                # Save the JSON data.
-                arcname = os.path.join("js", "database.js")
-                serialized_data = "data = " + serialized_data
-                zip.writestr(arcname, serialized_data)
-                del serialized_data
-
-                # Copy the template dependencies into the zip file.
-                for root, directories, files in os.walk(html_report):
-                    if root.endswith(os.path.sep + "backup"):
-                        continue
-                    for basename in files:
-                        if basename.endswith(".less"):
-                            continue
-                        if basename in ("index.html", "database.js"):
-                            continue
-                        filename = os.path.join(root, basename)
-                        arcname = filename[len(html_report):]
-                        if arcname == "index-orig.html":
-                            arcname = "index.html"
-                        zip.write(filename, arcname)
-
-        # Save it as an HTML file with no dependencies.
-        else:
-            with open(os.path.join(html_report, "index.html"), "rb") as fd:
-                template = fd.read()
-            assert "%DATA%" in template
-            serialized_data = template.replace("%DATA%", serialized_data)
-            del template
-            with open(output_file, "wb") as fd:
-                fd.write(serialized_data)
+        template = os.path.dirname(__file__)
+        template = os.path.abspath(template)
+        template = os.path.join(template, "template.html")
+        with open(template, "rb") as fd:
+            html = fd.read()
+        assert "%DATA%" in html, "Invalid template!"
+        html = html.replace("%DATA%", serialized_data)
+        del serialized_data
+        with open(output_file, "wb") as fd:
+            fd.write(html)
