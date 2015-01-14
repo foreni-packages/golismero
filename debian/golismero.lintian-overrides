@@ -1,4 +1,3 @@
-golismero source: source-is-missing
 golismero: arch-independent-package-contains-binary-or-object
 golismero: arch-dependent-file-in-usr-share
 golismero: binary-has-unneeded-section
@@ -13,3 +12,5 @@ golismero: python-script-but-no-python-dep
 golismero: script-not-executable
 golismero: unusual-interpreter
 golismero: executable-not-elf-or-script
+golismero: missing-dependency-on-libc
+golismero: shell-script-fails-syntax-check
