@@ -1,0 +1,3 @@
+version=3
+opts=uversionmangle=s/[-+.](beta|alpha|rc)/~$1/ \
+https://github.com/golismero/golismero/tags (?:.*/)?v?(.*)\.tar\.gz
